@@ -1,4 +1,4 @@
-type userId = string;
+export type userId = string;
 
 interface Chat {
     name: String;
@@ -18,10 +18,11 @@ export abstract class Store {
     getChats(room : string, limit: number,offset: number) {
 
     }
-    addChat(room: string, limit: number, offset: number) {
+    addChat(userId: userId, roomId: string, limit: number, offset: number) {
+
 
     }
-    update(room: string, chatId: string){
+    update(userId: userId, room: string, chatId: string){
 
     }
 }

@@ -10,19 +10,34 @@ export  class  InMemoryStore implements Store{
     constructor() {
        this.store = new Map<string, Room>()
     }
-    initRoom() {
+    initRoom(roomId:string) {
+        this.store.set(roomId, {
+            roomId,
+            chats: []
+        });
 
     }
+    // last 50 chats => limit = 50, offset - 0
+    // limit = 50, offset - 50 
     getChats(roomId : string, limit: number,offset: number) {
         const room = this.store.get(roomId);
         if(!room){
             return []
         }
-        return
+        return room.chats.reverse().slice(0, offset).slice(-1 * limit);
 
     }
-    addChat(room: string, limit: number, offset: number) {
-
+    addChat(userId: string, roomId: string, limit: number, offset: number) {
+      const room = this.store.get(roomId);
+       if(!room) {
+        return
+       }
+       room.chats.push({
+        userId,
+        name: string;
+        message: string;
+        upvotes: UserId[]
+       })
     }
     update(room: string, chatId: string){
 
