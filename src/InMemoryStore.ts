@@ -34,9 +34,9 @@ export  class  InMemoryStore implements Store{
        }
        room.chats.push({
         userId,
-        name: string;
-        message: string;
-        upvotes: UserId[]
+        name ,
+        message ,
+        upvotes: []
        })
     }
     update(room: string, chatId: string){
