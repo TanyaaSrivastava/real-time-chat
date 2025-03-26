@@ -23,7 +23,7 @@ export abstract class Store {
         const room = this.store.get(roomId);
 
     }
-    addChat(userId: userId, roomId: string, limit: number, offset: number) {
+    addChat(userId: userId, roomId: string,message: string ) {
 
 
     }
