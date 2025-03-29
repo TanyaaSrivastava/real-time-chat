@@ -1,33 +1,32 @@
-export type userId = string;
+export type UserId = string;
 
-interface Chat {
-    name: String;
-    userId: userId;
+ export interface Chat {
+    id : string;
+    name: string;
+    userId:UserId;
     message: string;
-    upvotes: userId;
+    upvotes: UserId[];
 }
-interface Room {
-    chats: Chat[];
-}
+
 
 
 export abstract class Store {
 
     constructor() {
-        this.store = new Map<string> , Room>();
+       // this.store = new Map<string> , Room>();
     }
     initRoom(roomId: string) {
 
     }
     getChats(roomId : string, limit: number,offset: number) {
-        const room = this.store.get(roomId);
+        //const room = this.store.get(roomId);
 
     }
-    addChat(userId: userId, roomId: string,message: string ) {
+    addChat(userId: UserId, roomId: string,message: string ) {
 
 
     }
-    update(userId: userId, room: string, chatId: string){
+    update(userId: UserId, room: string, chatId: string){
 
     }
 }
