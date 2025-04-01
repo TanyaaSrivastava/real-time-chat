@@ -1,19 +1,33 @@
 interface User {
     name : string;
     id: string;
-}x
+}
 interface Room {
     users: User[]
 }
 
 
 export class UserManager {
-    private users: Map<string, Room>;
+    private rooms: Map<string, Room>;
     constructor() {
-        this.users = new Map<string, Room>()
+        this.rooms = new Map<string, Room>()
     }
     addUser(name: string, userId: string, roomId: string, socket: WebSocket){
-
+        if (!this.rooms.get(roomId)) {
+           this.rooms.set(roomId, {
+            users: []
+           })
+        }
+        this.rooms.get(roomId)?.users.push({
+            id: userId,
+            name
+           }) 
+        }
+        removeUser(roomId: String, userId:String){
+            const users = this.rooms.get(roomId)?.users;
+            if (users){ 
+                users.filter(({id}) => id !== userId);
+            }
         
     }
 

@@ -1,7 +1,7 @@
 import {server as WebSocketServer} from "websocket"
 import http from 'http';
 
-var server = http.createServer(function(request: any, response: any) {
+const server = http.createServer(function(request: any, response: any) {
     console.log((new Date()) + ' Received request for ' + request.url);
     response.writeHead(404);
     response.end();
@@ -50,3 +50,6 @@ wsServer.on('request', function(request) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
 });
+function messageHandler(message: Message) {
+
+}
