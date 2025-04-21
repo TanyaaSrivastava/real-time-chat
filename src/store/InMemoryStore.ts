@@ -23,27 +23,33 @@ export class InMemoryStore implements Store {
     }
 
     addChat(userId: string, roomId: string, message: string, name: string) {
-    const room = this.store.get(roomId);
-    if (!room) return;
+        const room = this.store.get(roomId);
+        if (!room) return;
 
-    room.chats.push({
-        id: (globalChatId++).toString(),
-        userId,
-        name,
-        message,
-        upvotes: []
-    });
-}
+        room.chats.push({
+            id: (globalChatId++).toString(),
+            userId,
+            name,
+            message,
+            upvotes: []
+        });
+    }
 
-    upvote(userId: UserId, chatId: string, roomId: string) {
+    upvote(userId: UserId, roomId: string, chatId: string) {
         const room = this.store.get(roomId);
         if (!room) return null;
         const chat = room.chats.find(c => c.id === chatId);
         if (!chat) return null;
-        chat.upvotes.push(userId);
+
+        // Prevent multiple upvotes from the same user
+        if (!chat.upvotes.includes(userId)) {
+            chat.upvotes.push(userId);
+        }
+        
         return chat;
     }
 
+    // Placeholder for the update method if required by Store interface
     update() {
         // Add if required by Store interface
     }

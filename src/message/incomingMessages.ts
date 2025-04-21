@@ -6,6 +6,7 @@ export enum SupportedMessage {
     UpvoteMessage = "UPVOTE_MESSAGE",
 }
 
+// Zod schemas for different message types
 export const JoinRoomSchema = z.object({
     name: z.string(),
     userId: z.string(),
@@ -27,6 +28,7 @@ export const UpvoteMessageSchema = z.object({
 });
 export type UpvoteMessageType = z.infer<typeof UpvoteMessageSchema>;
 
+// Incoming message type, using union to handle different message types
 export type IncomingMessage = {
     type: SupportedMessage.JoinRoom,
     payload: JoinRoomType
@@ -38,10 +40,11 @@ export type IncomingMessage = {
     payload: UpvoteMessageType
 };
 
+// Function to parse incoming messages with Zod validation
 export function parseIncomingMessage(data: unknown): IncomingMessage {
     const parsed = z.object({
         type: z.nativeEnum(SupportedMessage),
-        payload: z.unknown()
+        payload: z.unknown() // Accept any type for the payload initially
     }).parse(data);
 
     switch (parsed.type) {

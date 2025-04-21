@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const websocket_1 = require("websocket");
 const outgoingMessage_1 = require("./message/outgoingMessage");
-const incomingMessages_1 = require("./message/incomingMessages");
+const incomingMessages_1 = require("./message/incomingMessages"); // ✅ Fixed import
 const UserManager_1 = require("./UserManager");
 const InMemoryStore_1 = require("./store/InMemoryStore");
 const http_1 = __importDefault(require("http"));
@@ -22,11 +22,10 @@ server.listen(8080, () => {
 });
 const wsServer = new websocket_1.server({
     httpServer: server,
-    autoAcceptConnections: false
+    autoAcceptConnections: true
 });
 function originIsAllowed(origin) {
-    // Customize origin check as needed
-    return true;
+    return true; // Customize origin check as needed
 }
 wsServer.on('request', (request) => {
     if (!originIsAllowed(request.origin)) {
@@ -76,7 +75,7 @@ function messageHandler(ws, message) {
                 upvotes: 0
             }
         };
-        userManager.broadcast(payload.roomId, payload.userId, outgoingPayload);
+        userManager.broadcast(payload.roomId, payload.userId, JSON.stringify(outgoingPayload));
     }
     if (type === incomingMessages_1.SupportedMessage.UpvoteMessage) {
         const user = userManager.getUser(payload.roomId, payload.userId);
@@ -84,16 +83,15 @@ function messageHandler(ws, message) {
             console.error("User not found in store");
             return;
         }
-        store.upvote(payload.userId, payload.chatId, payload.roomId);
         const outgoingPayload = {
             type: outgoingMessage_1.SupportedMessage.UpdateChat,
             payload: {
                 roomId: payload.roomId,
                 message: payload.message,
                 name: user.name,
-                upvotes: 0
+                upvotes: 0 // You might want to fetch actual upvotes here
             }
         };
-        userManager.broadcast(payload.roomId, payload.userId, outgoingPayload);
+        userManager.broadcast(payload.roomId, payload.userId, JSON.stringify(outgoingPayload));
     }
 }

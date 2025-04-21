@@ -20,6 +20,14 @@ class _UserManager {
         this.rooms.get(roomId)!.users.push({ id: userId, name, conn: socket });
     }
 
+    removeUser(roomId: string, userId: string) {
+        const room = this.rooms.get(roomId);
+        if (!room) return;
+
+        // Filter out the user from the room's user list
+        room.users = room.users.filter(({ id }) => id !== userId);
+    }
+
     getUser(roomId: string, userId: string) {
         const room = this.rooms.get(roomId);
         if (!room) return null;

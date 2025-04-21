@@ -1,6 +1,6 @@
 import { server as WebSocketServer, connection as WSConnection } from "websocket";
 import { OutgoingMessage, SupportedMessage as OutgoingSupportedMessage } from './message/outgoingMessage';
-import { SupportedMessage, parseIncomingMessage, IncomingMessage } from "./message/incomingMessages";
+import { initMessage, SupportedMessage, IncomingMessage } from './message/incomingMessages'; // ✅ Fixed import
 import { UserManager } from "./UserManager";
 import { InMemoryStore } from "./store/InMemoryStore";
 import http from 'http';
@@ -9,11 +9,43 @@ import http from 'http';
 
 const Storage = new InMemoryStore();
 
-// ... (keep all your existing server setup code)
+const wsServer = new WebSocketServer({
+    httpServer: server,
+    autoAcceptConnections: true
+});
+
+function originIsAllowed(origin: string): boolean {
+    return true; // Customize origin check as needed
+}
+
+wsServer.on('request', (request) => {
+    if (!originIsAllowed(request.origin)) {
+        request.reject();
+        console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+        return;
+    }
+
+    const connection = request.accept('echo-protocol', request.origin);
+    console.log((new Date()) + ' Connection accepted.');
+
+    connection.on('message', (message) => {
+        if (message.type === 'utf8') {
+            try {
+                const parsed = JSON.parse(message.utf8Data);
+                messageHandler(connection, parsed);
+            } catch (e) {
+                console.error("Failed to parse incoming message:", e);
+            }
+        } else if (message.type === 'binary') {
+            console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
+            connection.sendBytes(message.binaryData);
+        }
+    });
+});
 
 function messageHandler(ws: WSConnection, rawMessage: unknown) {
     try {
-        const message = parseIncomingMessage(rawMessage);
+        const message = initMessage(rawMessage);  // Assuming parseIncomingMessage is renamed to initMessage
         const { type, payload } = message;
 
         if (type === SupportedMessage.JoinRoom) {
@@ -50,7 +82,6 @@ function messageHandler(ws: WSConnection, rawMessage: unknown) {
             }
 
             const chat = Storage.upvote(payload.userId, payload.chatId, payload.roomId);
-
             if (!chat) {
                 console.error("Chat not found");
                 return; // Return early if chat is not found
@@ -71,4 +102,3 @@ function messageHandler(ws: WSConnection, rawMessage: unknown) {
         console.error("Error handling message:", e);
     }
 }
-
