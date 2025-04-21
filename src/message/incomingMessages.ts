@@ -1,10 +1,11 @@
 import z from "zod";
+
 export enum SupportedMessage {
     JoinRoom = "JOIN_ROOM",
     SendMessage = "SEND_MESSAGE",
     UpvoteMessage = "UPVOTE_MESSAGE",
 }
- type IncomingMessage = {
+ export type IncomingMessage = {
     type: SupportedMessage.JoinRoom,
     payload: InitMessageType
  } | {

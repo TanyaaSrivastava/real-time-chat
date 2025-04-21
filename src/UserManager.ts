@@ -28,8 +28,9 @@ export class UserManager {
             conn: socket
            }) 
         }
-        removeUser(roomId: String, userId:String){
+        removeUser(roomId: string, userId:String){
             const users = this.rooms.get(roomId)?.users;
+            
             if (users){ 
                 users.filter(({id}) => id !== userId);
             }

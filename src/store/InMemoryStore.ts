@@ -28,18 +28,24 @@ export class InMemoryStore implements Store{
         return room.chats.reverse().slice(0, offset).slice(-1 * limit);
 
     }
-    addChat(userId: string, roomId: string, message: string) {
-      const room = this.store.get(roomId);
-       if(!room) {
-        return
-       }
-       room.chats.push({
-        id: (globalChatId++).toString(),
-        userId,
-        name ,
-        message ,
-        upvotes: []
-       })
+    update(userId: UserId, room: string, chatId: string) {
+        // implement logic here
+      }
+      
+    addChat(userId: string,roomId: string, message: string) {
+        const room = this.store.get(roomId);
+        if (!room) {
+            return;
+        }
+    
+        const name = (userId);
+        room.chats.push({
+            id: (globalChatId++).toString(),
+            userId,
+            name,
+            message,
+            upvotes: []
+        });
     }
     upvote(userId: UserId, roomId: string, chatId: string){
         const room = this.store.get(roomId);

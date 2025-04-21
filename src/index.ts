@@ -1,6 +1,6 @@
 import { server as WebSocketServer, connection as WSConnection } from "websocket";
 import { OutgoingMessage, SupportedMessage as OutgoingSupportedMessage } from './message/outgoingMessage';
-import { initMessage, SupportedMessage, IncomingMessage } from "./message/incomingMessages"; 
+import { initMessage, SupportedMessage, IncomingMessage } from './message/incomingMessages'; // ✅ Fixed import
 import { UserManager } from "./UserManager";
 import { InMemoryStore } from "./store/InMemoryStore";
 import http from 'http';
@@ -21,12 +21,11 @@ server.listen(8080, () => {
 
 const wsServer = new WebSocketServer({
     httpServer: server,
-    autoAcceptConnections: false
+    autoAcceptConnections: true
 });
 
 function originIsAllowed(origin: string): boolean {
-    // Customize origin check as needed
-    return true;
+    return true; // Customize origin check as needed
 }
 
 wsServer.on('request', (request) => {
@@ -84,7 +83,8 @@ function messageHandler(ws: WSConnection, message: IncomingMessage) {
             }
         };
 
-        userManager.broadcast(payload.roomId, payload.userId, outgoingPayload);
+        userManager.broadcast(payload.roomId, payload.userId, JSON.stringify(outgoingPayload));
+
     }
 
     if (type === SupportedMessage.UpvoteMessage) {
@@ -94,7 +94,7 @@ function messageHandler(ws: WSConnection, message: IncomingMessage) {
             return;
         }
 
-        store.upvote(payload.userId, payload.chatId, payload.roomId);
+        
 
         const outgoingPayload: OutgoingMessage = {
             type: OutgoingSupportedMessage.UpdateChat,
@@ -102,10 +102,11 @@ function messageHandler(ws: WSConnection, message: IncomingMessage) {
                 roomId: payload.roomId,
                 message: payload.message,
                 name: user.name,
-                upvotes: 0 
+                upvotes: 0 // You might want to fetch actual upvotes here
             }
         };
 
-        userManager.broadcast(payload.roomId, payload.userId, outgoingPayload);
+        userManager.broadcast(payload.roomId, payload.userId, JSON.stringify(outgoingPayload));
+
     }
 }
