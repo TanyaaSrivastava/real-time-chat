@@ -1,59 +1,47 @@
-import { OutgoingMessage } from "./message/outgoingMessage";
-import {connection} from "websocket";
+import { connection as WSConnection } from "websocket";
 
 interface User {
-    name : string;
     id: string;
-    conn: connection;
+    name: string;
+    conn: WSConnection;
 }
+
 interface Room {
-    users: User[]
+    users: User[];
 }
 
+class _UserManager {
+    private rooms: Map<string, Room> = new Map();
 
-export class UserManager {
-    private rooms: Map<string, Room>;
-    constructor() {
-        this.rooms = new Map<string, Room>()
-    }
-    addUser(name: string, userId: string, roomId: string, socket: connection){
-        if (!this.rooms.get(roomId)) {
-           this.rooms.set(roomId, {
-            users: []
-           })
+    addUser(name: string, userId: string, roomId: string, socket: WSConnection) {
+        if (!this.rooms.has(roomId)) {
+            this.rooms.set(roomId, { users: [] });
         }
-        this.rooms.get(roomId)?.users.push({
-            id: userId,
-            name,
-            conn: socket
-           }) 
-        }
-        removeUser(roomId: string, userId:String){
-            const users = this.rooms.get(roomId)?.users;
-            
-            if (users){ 
-                users.filter(({id}) => id !== userId);
-            }
-        
+        this.rooms.get(roomId)!.users.push({ id: userId, name, conn: socket });
     }
-    getUser(roomId: string, userId: string): User | null {
-        const user = this.rooms.get(roomId)?.users.find((({id}) => id === userId));
-        return user ?? null;
-    }
-    broadcast(roomId: string, userId:string, message: string){
-        const user = this.getUser(roomId,userId);
-        if(!user){
-            console.error("user not found");
-            return;
-        }
+
+    removeUser(roomId: string, userId: string) {
         const room = this.rooms.get(roomId);
-        if (!room) {
-            console.error("room not found");
-            return;
-        }
-        room.users.forEach(({conn}) => {
-            conn.sendUTF(JSON.stringify(message))
-        })
+        if (!room) return;
+
+        // Filter out the user from the room's user list
+        room.users = room.users.filter(({ id }) => id !== userId);
     }
 
+    getUser(roomId: string, userId: string) {
+        const room = this.rooms.get(roomId);
+        if (!room) return null;
+        return room.users.find(user => user.id === userId) || null;
+    }
+
+    broadcast(roomId: string, message: string) {
+        const room = this.rooms.get(roomId);
+        if (!room) return;
+        room.users.forEach(({ conn }) => {
+            conn.sendUTF(message);
+        });
+    }
 }
+
+// Export a singleton instance
+export const UserManager = new _UserManager();

@@ -5,19 +5,9 @@ import { UserManager } from "./UserManager";
 import { InMemoryStore } from "./store/InMemoryStore";
 import http from 'http';
 
-// Create HTTP server
-const server = http.createServer((request, response) => {
-    console.log((new Date()) + ' Received request for ' + request.url);
-    response.writeHead(404);
-    response.end();
-});
+// Adjust path as necessary
 
-const userManager = new UserManager();
-const store = new InMemoryStore();
-
-server.listen(8080, () => {
-    console.log((new Date()) + ' Server is listening on port 8080');
-});
+const Storage = new InMemoryStore();
 
 const wsServer = new WebSocketServer({
     httpServer: server,
@@ -51,62 +41,64 @@ wsServer.on('request', (request) => {
             connection.sendBytes(message.binaryData);
         }
     });
-
-    connection.on('close', (reasonCode, description) => {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-    });
 });
 
-function messageHandler(ws: WSConnection, message: IncomingMessage) {
-    const { type, payload } = message;
+function messageHandler(ws: WSConnection, rawMessage: unknown) {
+    try {
+        const message = initMessage(rawMessage);  // Assuming parseIncomingMessage is renamed to initMessage
+        const { type, payload } = message;
 
-    if (type === SupportedMessage.JoinRoom) {
-        userManager.addUser(payload.name, payload.userId, payload.roomId, ws);
-    }
-
-    if (type === SupportedMessage.SendMessage) {
-        const user = userManager.getUser(payload.roomId, payload.userId);
-        if (!user) {
-            console.error("User not found in store");
-            return;
+        if (type === SupportedMessage.JoinRoom) {
+            UserManager.addUser(payload.name, payload.userId, payload.roomId, ws);
         }
 
-        store.addChat(payload.userId, user.name, payload.roomId);
-
-        const outgoingPayload: OutgoingMessage = {
-            type: OutgoingSupportedMessage.AddChat,
-            payload: {
-                roomId: payload.roomId,
-                message: payload.message,
-                name: user.name,
-                upvotes: 0
+        if (type === SupportedMessage.SendMessage) {
+            const user = UserManager.getUser(payload.roomId, payload.userId);
+            if (!user) {
+                console.error("User not found in store");
+                return;
             }
-        };
 
-        userManager.broadcast(payload.roomId, payload.userId, JSON.stringify(outgoingPayload));
+            Storage.addChat(payload.userId, user.name, payload.roomId, payload.message);
 
-    }
+            const outgoingPayload: OutgoingMessage = {
+                type: OutgoingSupportedMessage.AddChat,
+                payload: {
+                    roomId: payload.roomId,
+                    message: payload.message,
+                    name: user.name,
+                    upvotes: 0 // Initially, no upvotes
+                }
+            };
 
-    if (type === SupportedMessage.UpvoteMessage) {
-        const user = userManager.getUser(payload.roomId, payload.userId);
-        if (!user) {
-            console.error("User not found in store");
-            return;
+            UserManager.broadcast(payload.roomId, JSON.stringify(outgoingPayload));
         }
 
-        
-
-        const outgoingPayload: OutgoingMessage = {
-            type: OutgoingSupportedMessage.UpdateChat,
-            payload: {
-                roomId: payload.roomId,
-                message: payload.message,
-                name: user.name,
-                upvotes: 0 // You might want to fetch actual upvotes here
+        if (type === SupportedMessage.UpvoteMessage) {
+            const user = UserManager.getUser(payload.roomId, payload.userId);
+            if (!user) {
+                console.error("User not found in store");
+                return;
             }
-        };
 
-        userManager.broadcast(payload.roomId, payload.userId, JSON.stringify(outgoingPayload));
+            const chat = Storage.upvote(payload.userId, payload.chatId, payload.roomId);
+            if (!chat) {
+                console.error("Chat not found");
+                return; // Return early if chat is not found
+            }
 
+            const outgoingPayload: OutgoingMessage = {
+                type: OutgoingSupportedMessage.UpdateChat,
+                payload: {
+                    roomId: payload.roomId,
+                    chatId: payload.chatId,
+                    upvotes: chat.upvotes.length // Now, count the upvotes as a number
+                }
+            };
+
+            UserManager.broadcast(payload.roomId, JSON.stringify(outgoingPayload));
+        }
+    } catch (e) {
+        console.error("Error handling message:", e);
     }
 }

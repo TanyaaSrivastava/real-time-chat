@@ -1,32 +1,24 @@
 export type UserId = string;
 
- export interface Chat {
-    id : string;
+export interface Chat {
+    id: string;
     name: string;
-    userId:UserId;
+    userId: UserId;
     message: string;
     upvotes: UserId[];
 }
 
-
-
 export abstract class Store {
-
     constructor() {
-       // this.store = new Map<string> , Room>();
+        // this.store = new Map<string, Room>();
     }
-    initRoom(roomId: string) {
 
-    }
-    getChats(roomId : string, limit: number,offset: number) {
-        //const room = this.store.get(roomId);
+    initRoom(roomId: string) {}
 
-    }
-    addChat(userId: UserId, roomId: string,message: string ) {
+    getChats(roomId: string, limit: number, offset: number) {}
 
+    // 🔥 Fix here: add name to match the implementation
+    abstract addChat(userId: UserId, roomId: string, message: string, name: string): void;
 
-    }
-    update(userId: UserId, room: string, chatId: string){
-
-    }
+    abstract update(userId: UserId, room: string, chatId: string): void;
 }
