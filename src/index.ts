@@ -1,6 +1,6 @@
 import { server as WebSocketServer, connection as WSConnection } from "websocket";
 import { OutgoingMessage, SupportedMessage as OutgoingSupportedMessage } from './message/outgoingMessage';
-import { initMessage, SupportedMessage, IncomingMessage } from "./message/incomingMessages"; 
+import { initMessage, SupportedMessage, incomingMessage } from "./message/incomingMessages"; 
 import { UserManager } from "./UserManager";
 import { InMemoryStore } from "./store/InMemoryStore";
 import http from 'http';
