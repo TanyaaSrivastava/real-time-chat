@@ -22,22 +22,10 @@ class _UserManager {
 
     removeUser(roomId: string, userId: string) {
         const room = this.rooms.get(roomId);
-<<<<<<< HEAD
         if (!room) return;
 
         // Filter out the user from the room's user list
         room.users = room.users.filter(({ id }) => id !== userId);
-=======
-        if (!room) {
-            console.error("room not found");
-            return;
-        }
-
-        room.users.forEach(({conn}) => {
-            console.log("outgoing message"+ JSON.stringify(message))
-            conn.sendUTF(JSON.stringify(message))
-        })
->>>>>>> 7997804 (WIP: saving changes before pull)
     }
 
     getUser(roomId: string, userId: string) {

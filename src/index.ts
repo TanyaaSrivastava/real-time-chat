@@ -27,16 +27,6 @@ server.listen(8080, () => {
 
 // ✅ 4. WebSocket logic
 wsServer.on('request', (request) => {
-<<<<<<< HEAD
-=======
-    console.log("inside connect");
-    if (!originIsAllowed(request.origin)) {
-        request.reject();
-        console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
-        return;
-    }
-
->>>>>>> 7997804 (WIP: saving changes before pull)
     const connection = request.accept('echo-protocol', request.origin);
     console.log(`[${new Date().toISOString()}] Connection accepted from ${request.origin}`);
 
@@ -62,16 +52,10 @@ wsServer.on('request', (request) => {
     });
 });
 
-<<<<<<< HEAD
 function messageHandler(ws: WSConnection, rawMessage: unknown) {
     try {
         const message = parseIncomingMessage(rawMessage);
         const { type, payload } = message;
-=======
-function messageHandler(ws: WSConnection, message: IncomingMessage) {
-    console.log("incoming message"+ JSON.stringify(message));
-    const { type, payload } = message;
->>>>>>> 7997804 (WIP: saving changes before pull)
 
         if (type === SupportedMessage.JoinRoom) {
             UserManager.addUser(payload.name, payload.userId, payload.roomId, ws);
