@@ -15,6 +15,7 @@ const server = http_1.default.createServer((request, response) => {
     response.writeHead(404);
     response.end();
 });
+server;
 const userManager = new UserManager_1.UserManager();
 const store = new InMemoryStore_1.InMemoryStore();
 server.listen(8080, () => {
@@ -22,13 +23,15 @@ server.listen(8080, () => {
 });
 const wsServer = new websocket_1.server({
     httpServer: server,
-    autoAcceptConnections: true
+    autoAcceptConnections: false
 });
 function originIsAllowed(origin) {
     return true; // Customize origin check as needed
 }
-wsServer.on('request', (request) => {
+wsServer.on('request', function (request) {
+    console.log("inside connect");
     if (!originIsAllowed(request.origin)) {
+        //make sure we only connect request from an allowed origin
         request.reject();
         console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
         return;

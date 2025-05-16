@@ -1,0 +1,13 @@
+<head>
+
+</head>
+<body>
+    <script>
+        const ws = new WebSocket("ws://localhost:8080","echo-protocol");
+        ws.onopen = function() {
+            alert("connected");
+        }
+
+    </script>
+    hello world
+</body>
